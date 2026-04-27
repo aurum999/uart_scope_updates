@@ -1,0 +1,34 @@
+{
+  "appName": "uart_scope_update",
+  "description": "Desktop app updates",
+  "items": [
+    {
+      "version": "1.5.0",
+      "shortVersion": 7,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "增加RTT"
+        }
+      ],
+      "date": "2026-04-27",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.5.0+7-windows",
+      "platform": "windows"
+    },
+    {
+      "version": "1.4.0",
+      "shortVersion": 6,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "增加串口助手"
+        }
+      ],
+      "date": "2026-04-20",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.4.0+6-windows",
+      "platform": "windows"
+    }
+  ]
+}
