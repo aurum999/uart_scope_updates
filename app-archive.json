@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.5.2",
+      "shortVersion": 9,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "rtt优化"
+        }
+      ],
+      "date": "2026-04-28",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.5.2+9-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.5.1",
       "shortVersion": 8,
       "changes": [
