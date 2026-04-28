@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.5.1",
+      "shortVersion": 8,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "波形优化"
+        }
+      ],
+      "date": "2026-04-28",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.5.1+8-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.5.0",
       "shortVersion": 7,
       "changes": [
