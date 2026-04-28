@@ -1,17 +1,17 @@
-{
-  "schemaVersion": 1,
-  "generatedAt": "2026-04-27T06:54:50Z",
-  "plugins": [
-    {
-      "id": "pyocd-rtt",
-      "version": "0.44.1",
-      "protocolVersion": 2,
-      "platform": "windows",
-      "arch": "x64",
-      "fileName": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
-      "url": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
-      "size": 41271273,
-      "sha256": "4a4ecaaf125d7b9b0d15a5c21bf28496a64e4be333d0379c06a4c75cb163368b"
-    }
-  ]
+﻿{
+    "schemaVersion":  1,
+    "generatedAt":  "2026-04-27T06:54:50Z",
+    "plugins":  [
+                    {
+                        "id":  "pyocd-rtt",
+                        "version":  "0.44.1",
+                        "protocolVersion":  2,
+                        "platform":  "windows",
+                        "arch":  "x64",
+                        "fileName":  "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
+                        "url":  "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
+                        "size":  41350443,
+                        "sha256":  "debfe62cdab814c510a963f049168aac76970151daca61098ee0884c0e8603cf"
+                    }
+                ]
 }
