@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-04-30T12:50:46Z",
+  "generatedAt": "2026-05-01T11:04:02Z",
   "plugins": [
     {
       "id": "pyocd-rtt",
@@ -10,8 +10,8 @@
       "arch": "x64",
       "fileName": "uart_scope_rtt_pyocd_windows_x64_0.44.1.dev1.zip",
       "url": "uart_scope_rtt_pyocd_windows_x64_0.44.1.dev1.zip",
-      "size": 84188001,
-      "sha256": "6e45badd239cc964d856b95412ed75c2f4b644e50c5863c4ba645141a4fb7577"
+      "size": 34113461,
+      "sha256": "abd8614d7f2e5ef2a6b43b36c1286b50fc03575b00f09ce3017c4ecf1ff06fe9"
     }
   ]
 }
