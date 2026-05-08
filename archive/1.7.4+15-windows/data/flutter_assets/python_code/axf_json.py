@@ -900,16 +900,25 @@ def run_reader(config_path: str) -> int:
             if now < next_time:
                 time.sleep(min(0.02, next_time - now))
                 continue
+            scheduled_time = next_time
             next_time = max(next_time + interval, now)
             sample_count += 1
+            read_start = time.monotonic()
             values = read_once(target, variables)
+            read_elapsed_ms = (time.monotonic() - read_start) * 1000.0
+            lag_ms = max(0.0, (read_start - scheduled_time) * 1000.0)
             if sample_count <= 5 or sample_count % 100 == 0:
-                debug(f"sample count={sample_count} values={values[:8]}")
+                debug(
+                    f"sample count={sample_count} values={values[:8]} "
+                    f"readMs={read_elapsed_ms:.3f} lagMs={lag_ms:.3f}"
+                )
             emit(
                 {
                     "type": "sample",
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "values": values,
+                    "readMs": read_elapsed_ms,
+                    "lagMs": lag_ms,
                 }
             )
     except KeyboardInterrupt:
