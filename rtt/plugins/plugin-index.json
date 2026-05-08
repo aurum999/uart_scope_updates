@@ -5,7 +5,7 @@
     {
       "id": "pyocd-rtt",
       "version": "0.44.1",
-      "protocolVersion": 9,
+      "protocolVersion": 4,
       "platform": "windows",
       "arch": "x64",
       "fileName": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
