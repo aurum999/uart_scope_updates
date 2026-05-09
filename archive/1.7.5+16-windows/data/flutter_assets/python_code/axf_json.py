@@ -2,6 +2,7 @@
 import argparse
 import json
 import math
+import os
 import struct
 import sys
 import time
@@ -54,6 +55,78 @@ def attr(die, name: str):
     if value is None:
         return None
     return decode_bytes(value.value)
+
+
+def source_path_from_parts(
+    *,
+    comp_dir: Optional[str],
+    directory: Optional[str],
+    file_name: Optional[str],
+) -> Optional[str]:
+    if not file_name:
+        return None
+    file_name = decode_bytes(file_name)
+    directory = decode_bytes(directory) if directory else None
+    comp_dir = decode_bytes(comp_dir) if comp_dir else None
+    if os.path.isabs(str(file_name)):
+        return str(file_name)
+    if directory:
+        directory_text = str(directory)
+        if os.path.isabs(directory_text):
+            return os.path.normpath(os.path.join(directory_text, str(file_name)))
+        if comp_dir:
+            return os.path.normpath(os.path.join(str(comp_dir), directory_text, str(file_name)))
+        return os.path.normpath(os.path.join(directory_text, str(file_name)))
+    if comp_dir:
+        return os.path.normpath(os.path.join(str(comp_dir), str(file_name)))
+    return str(file_name)
+
+
+def compile_unit_source_path(cu) -> Optional[str]:
+    top_die = cu.get_top_DIE()
+    return source_path_from_parts(
+        comp_dir=attr(top_die, "DW_AT_comp_dir"),
+        directory=None,
+        file_name=attr(top_die, "DW_AT_name"),
+    )
+
+
+def die_decl_source(dwarf_info, cu, die, fallback: Optional[str]) -> Optional[str]:
+    file_index = attr(die, "DW_AT_decl_file")
+    if not isinstance(file_index, int):
+        return fallback
+    try:
+        line_program = dwarf_info.line_program_for_CU(cu)
+    except Exception:
+        return fallback
+    if line_program is None:
+        return fallback
+    header = line_program.header
+    file_entries = header.get("file_entry") or []
+    if not file_entries:
+        return fallback
+    entry_index = file_index - 1 if file_index > 0 else file_index
+    if entry_index < 0 or entry_index >= len(file_entries):
+        return fallback
+    entry = file_entries[entry_index]
+    include_dirs = header.get("include_directory") or []
+    comp_dir = attr(cu.get_top_DIE(), "DW_AT_comp_dir")
+    directory = None
+    dir_index = getattr(entry, "dir_index", None)
+    if isinstance(dir_index, int) and dir_index > 0:
+        include_index = dir_index - 1
+        if 0 <= include_index < len(include_dirs):
+            directory = include_dirs[include_index]
+    return source_path_from_parts(
+        comp_dir=comp_dir,
+        directory=directory,
+        file_name=getattr(entry, "name", None),
+    ) or fallback
+
+
+def die_decl_line(die) -> Optional[int]:
+    line = attr(die, "DW_AT_decl_line")
+    return line if isinstance(line, int) and line > 0 else None
 
 
 def get_type_die(die):
@@ -276,6 +349,8 @@ def make_variable_item(
     address: int,
     scope: str,
     source: Optional[str],
+    line: Optional[int] = None,
+    is_static: Optional[bool] = None,
     read_info: Optional[Dict[str, Any]] = None,
     read_mode: Optional[str] = None,
     read_offset: Optional[int] = None,
@@ -291,6 +366,10 @@ def make_variable_item(
         "encoding": type_info["encoding"],
         "source": source,
     }
+    if line is not None:
+        item["line"] = line
+    if is_static is not None:
+        item["isStatic"] = is_static
     if read_info is not None:
         item["readSize"] = read_info.get("size")
         item["readKind"] = read_info.get("kind")
@@ -314,11 +393,14 @@ def read_info_for_variable(type_die, type_info: Dict[str, Any]) -> Optional[Dict
 
 def expand_struct_fields(
     dwarf_info,
+    cu,
     type_die,
     *,
     base_name: str,
     base_address: int,
     source: Optional[str],
+    line: Optional[int],
+    is_static: bool,
     depth: int = 0,
     visited: Optional[Set[int]] = None,
 ) -> List[Dict[str, Any]]:
@@ -348,6 +430,8 @@ def expand_struct_fields(
         member_read_info = read_info_for_variable(member_type_die, member_type_info)
         member_address = base_address + (member_offset or 0)
         field_name = f"{base_name}.{member_name}"
+        member_source = die_decl_source(dwarf_info, cu, child, source)
+        member_line = die_decl_line(child) or line
 
         if member_offset is None or child.attributes.get("DW_AT_bit_size") is not None:
             unsupported_type = {
@@ -361,7 +445,9 @@ def expand_struct_fields(
                     type_info=unsupported_type,
                     address=member_address,
                     scope="struct_field",
-                    source=source,
+                    source=member_source,
+                    line=member_line,
+                    is_static=is_static,
                 )
             )
             continue
@@ -372,7 +458,9 @@ def expand_struct_fields(
                 type_info=member_type_info,
                 address=member_address,
                 scope="struct_field",
-                source=source,
+                source=member_source,
+                line=member_line,
+                is_static=is_static,
                 read_info=member_read_info,
             )
         )
@@ -385,10 +473,13 @@ def expand_struct_fields(
             fields.extend(
                 expand_struct_fields(
                     dwarf_info,
+                    cu,
                     concrete_member_type,
                     base_name=field_name,
                     base_address=member_address,
-                    source=source,
+                    source=member_source,
+                    line=member_line,
+                    is_static=is_static,
                     depth=depth + 1,
                     visited=visited,
                 )
@@ -398,11 +489,14 @@ def expand_struct_fields(
 
 def expand_pointer_struct_fields(
     dwarf_info,
+    cu,
     pointer_type_die,
     *,
     base_name: str,
     pointer_address: int,
     source: Optional[str],
+    line: Optional[int],
+    is_static: bool,
 ) -> List[Dict[str, Any]]:
     pointer_size = pointer_size_for_type(pointer_type_die)
     target_type_die = pointer_target_type_die(pointer_type_die)
@@ -411,10 +505,13 @@ def expand_pointer_struct_fields(
     return _expand_indirect_struct_fields(
         dwarf_info,
         target_type_die,
+        cu=cu,
         base_name=base_name,
         pointer_address=pointer_address,
         pointer_size=pointer_size,
         source=source,
+        line=line,
+        is_static=is_static,
     )
 
 
@@ -422,10 +519,13 @@ def _expand_indirect_struct_fields(
     dwarf_info,
     type_die,
     *,
+    cu,
     base_name: str,
     pointer_address: int,
     pointer_size: int,
     source: Optional[str],
+    line: Optional[int],
+    is_static: bool,
     base_offset: int = 0,
     depth: int = 0,
     visited: Optional[Set[int]] = None,
@@ -460,6 +560,8 @@ def _expand_indirect_struct_fields(
             if depth == 0
             else f"{base_name}.{member_name}"
         )
+        member_source = die_decl_source(dwarf_info, cu, child, source)
+        member_line = die_decl_line(child) or line
 
         if member_offset is None or child.attributes.get("DW_AT_bit_size") is not None:
             unsupported_type = {
@@ -473,7 +575,9 @@ def _expand_indirect_struct_fields(
                     type_info=unsupported_type,
                     address=pointer_address,
                     scope="pointer_field",
-                    source=source,
+                    source=member_source,
+                    line=member_line,
+                    is_static=is_static,
                     read_mode="indirect",
                     read_offset=read_offset,
                     pointer_size=pointer_size,
@@ -487,7 +591,9 @@ def _expand_indirect_struct_fields(
                 type_info=member_type_info,
                 address=pointer_address,
                 scope="pointer_field",
-                source=source,
+                source=member_source,
+                line=member_line,
+                is_static=is_static,
                 read_info=member_read_info,
                 read_mode="indirect",
                 read_offset=read_offset,
@@ -504,10 +610,13 @@ def _expand_indirect_struct_fields(
                 _expand_indirect_struct_fields(
                     dwarf_info,
                     concrete_member_type,
+                    cu=cu,
                     base_name=field_name,
                     pointer_address=pointer_address,
                     pointer_size=pointer_size,
-                    source=source,
+                    source=member_source,
+                    line=member_line,
+                    is_static=is_static,
                     base_offset=read_offset,
                     depth=depth + 1,
                     visited=visited,
@@ -560,8 +669,7 @@ def parse_axf_globals(axf_path: str, only_external: bool = False) -> List[Dict[s
             raise RuntimeError("这个 AXF 没有 DWARF 调试信息，无法可靠获取变量类型。")
         dwarf_info = elf.get_dwarf_info()
         for cu in dwarf_info.iter_CUs():
-            top_die = cu.get_top_DIE()
-            source_file = attr(top_die, "DW_AT_name")
+            source_file = compile_unit_source_path(cu)
             for die in cu.iter_DIEs():
                 if die.tag != "DW_TAG_variable":
                     continue
@@ -574,6 +682,9 @@ def parse_axf_globals(axf_path: str, only_external: bool = False) -> List[Dict[s
                 is_external = bool(attr(die, "DW_AT_external"))
                 if only_external and not is_external:
                     continue
+                is_static = not is_external
+                variable_source = die_decl_source(dwarf_info, cu, die, source_file)
+                variable_line = die_decl_line(die)
                 type_die = get_type_die(die)
                 type_info = resolve_type(type_die)
                 read_info = read_info_for_variable(type_die, type_info)
@@ -584,26 +695,34 @@ def parse_axf_globals(axf_path: str, only_external: bool = False) -> List[Dict[s
                         type_info=type_info,
                         address=address,
                         scope=scope,
-                        source=source_file,
+                        source=variable_source,
+                        line=variable_line,
+                        is_static=is_static,
                         read_info=read_info,
                     )
                 )
                 result.extend(
                     expand_struct_fields(
                         dwarf_info,
+                        cu,
                         type_die,
                         base_name=name,
                         base_address=address,
-                        source=source_file,
+                        source=variable_source,
+                        line=variable_line,
+                        is_static=is_static,
                     )
                 )
                 result.extend(
                     expand_pointer_struct_fields(
                         dwarf_info,
+                        cu,
                         type_die,
                         base_name=name,
                         pointer_address=address,
-                        source=source_file,
+                        source=variable_source,
+                        line=variable_line,
+                        is_static=is_static,
                     )
                 )
     result.sort(key=lambda item: (int(item["address"], 16), item["name"]))
@@ -781,16 +900,25 @@ def run_reader(config_path: str) -> int:
             if now < next_time:
                 time.sleep(min(0.02, next_time - now))
                 continue
+            scheduled_time = next_time
             next_time = max(next_time + interval, now)
             sample_count += 1
+            read_start = time.monotonic()
             values = read_once(target, variables)
+            read_elapsed_ms = (time.monotonic() - read_start) * 1000.0
+            lag_ms = max(0.0, (read_start - scheduled_time) * 1000.0)
             if sample_count <= 5 or sample_count % 100 == 0:
-                debug(f"sample count={sample_count} values={values[:8]}")
+                debug(
+                    f"sample count={sample_count} values={values[:8]} "
+                    f"readMs={read_elapsed_ms:.3f} lagMs={lag_ms:.3f}"
+                )
             emit(
                 {
                     "type": "sample",
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "values": values,
+                    "readMs": read_elapsed_ms,
+                    "lagMs": lag_ms,
                 }
             )
     except KeyboardInterrupt:
