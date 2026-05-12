@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.7.9",
+      "shortVersion": 20,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "数学通道优化"
+        }
+      ],
+      "date": "2026-05-12",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.7.9+20-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.7.8",
       "shortVersion": 19,
       "changes": [
