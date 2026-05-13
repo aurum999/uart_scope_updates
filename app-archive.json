@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.8.0",
+      "shortVersion": 23,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "定时发送"
+        }
+      ],
+      "date": "2026-05-13",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.8.0+23-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.7.9",
       "shortVersion": 20,
       "changes": [
@@ -14,34 +28,6 @@
       "date": "2026-05-12",
       "mandatory": false,
       "url": "https://aurum999.github.io/uart_scope_updates/archive/1.7.9+20-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.7.8",
-      "shortVersion": 19,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "界面优化"
-        }
-      ],
-      "date": "2026-05-10",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.7.8+19-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.7.6",
-      "shortVersion": 18,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "界面优化"
-        }
-      ],
-      "date": "2026-05-09",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.7.6+17-windows",
       "platform": "windows"
     }
   ]
