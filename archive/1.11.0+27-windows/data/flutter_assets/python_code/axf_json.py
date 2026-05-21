@@ -7,7 +7,7 @@ import struct
 import sys
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from elftools.dwarf.dwarf_expr import DWARFExprParser
 from elftools.elf.elffile import ELFFile
@@ -771,6 +771,283 @@ def parse_axf_globals(axf_path: str, only_external: bool = False) -> List[Dict[s
     return result
 
 
+def _address_int(value: Any) -> int:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return 0
+        try:
+            return int(text, 0)
+        except ValueError:
+            return 0
+    return 0
+
+
+def _die_function_name(die) -> str:
+    return (
+        attr(die, "DW_AT_linkage_name")
+        or attr(die, "DW_AT_MIPS_linkage_name")
+        or attr(die, "DW_AT_name")
+        or "<unknown>"
+    )
+
+
+def _die_high_pc(die, low_pc: int) -> Optional[int]:
+    high_attr = die.attributes.get("DW_AT_high_pc")
+    if high_attr is None:
+        return None
+    high_value = decode_bytes(high_attr.value)
+    if not isinstance(high_value, int):
+        return None
+    if high_attr.form == "DW_FORM_addr":
+        return high_value
+    return low_pc + high_value
+
+
+def collect_axf_symbols(
+    axf_path: str,
+) -> Tuple[List[Tuple[int, int]], List[Dict[str, Any]]]:
+    code_ranges: List[Tuple[int, int]] = []
+    functions: List[Dict[str, Any]] = []
+    with open(axf_path, "rb") as handle:
+        elf = ELFFile(handle)
+        for section in elf.iter_sections():
+            try:
+                flags = int(section["sh_flags"])
+                address = int(section["sh_addr"])
+                size = int(section["sh_size"])
+            except Exception:
+                continue
+            if address <= 0 or size <= 0:
+                continue
+            # SHF_EXECINSTR = 0x4. These ranges are enough to reject stack
+            # words that are clearly not return addresses.
+            if flags & 0x4:
+                code_ranges.append((address, address + size))
+
+        if elf.has_dwarf_info():
+            dwarf_info = elf.get_dwarf_info()
+            for cu in dwarf_info.iter_CUs():
+                source_file = compile_unit_source_path(cu)
+                for die in cu.iter_DIEs():
+                    if die.tag != "DW_TAG_subprogram":
+                        continue
+                    low_pc = attr(die, "DW_AT_low_pc")
+                    if not isinstance(low_pc, int) or low_pc <= 0:
+                        continue
+                    high_pc = _die_high_pc(die, low_pc)
+                    if not isinstance(high_pc, int) or high_pc <= low_pc:
+                        high_pc = low_pc + 1
+                    functions.append(
+                        {
+                            "name": _die_function_name(die),
+                            "start": low_pc,
+                            "end": high_pc,
+                            "source": die_decl_source(
+                                dwarf_info,
+                                cu,
+                                die,
+                                source_file,
+                            ),
+                            "line": die_decl_line(die),
+                        }
+                    )
+
+        symtab = elf.get_section_by_name(".symtab")
+        if symtab is not None:
+            for symbol in symtab.iter_symbols():
+                try:
+                    if symbol["st_info"]["type"] != "STT_FUNC":
+                        continue
+                    address = int(symbol["st_value"])
+                    size = int(symbol["st_size"])
+                except Exception:
+                    continue
+                if address <= 0:
+                    continue
+                name = decode_bytes(symbol.name) or "<unknown>"
+                functions.append(
+                    {
+                        "name": str(name),
+                        "start": address,
+                        "end": address + max(1, size),
+                        "source": None,
+                        "line": None,
+                    }
+                )
+
+    code_ranges.sort()
+    functions.sort(key=lambda item: (int(item["start"]), int(item["end"])))
+    return code_ranges, functions
+
+
+def _is_code_address(address: int, code_ranges: List[Tuple[int, int]]) -> bool:
+    address &= ~1
+    for start, end in code_ranges:
+        if start <= address < end:
+            return True
+        if start > address:
+            break
+    return False
+
+
+def _symbolize_address(
+    address: int,
+    functions: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    normalized = address & ~1
+    best: Optional[Dict[str, Any]] = None
+    for function in functions:
+        start = int(function.get("start") or 0)
+        end = int(function.get("end") or start + 1)
+        if start <= normalized < end:
+            best = function
+            break
+        if start > normalized:
+            break
+    if best is None:
+        return {
+            "function": "<unknown>",
+            "offset": None,
+            "source": None,
+            "line": None,
+        }
+    start = int(best.get("start") or normalized)
+    return {
+        "function": best.get("name") or "<unknown>",
+        "offset": max(0, normalized - start),
+        "source": best.get("source"),
+        "line": best.get("line"),
+    }
+
+
+def _read_core_register_int(target, name: str) -> int:
+    try:
+        return int(target.read_core_register(name))
+    except Exception:
+        return 0
+
+
+def _target_is_running_state(state: Any) -> bool:
+    name = getattr(state, "name", str(state)).upper()
+    return name in {"RUNNING", "SLEEPING", "RESET"}
+
+
+def _make_stack_frame(
+    *,
+    index: int,
+    address: int,
+    kind: str,
+    functions: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    symbol = _symbolize_address(address, functions)
+    return {
+        "index": index,
+        "address": f"0x{(address & ~1):08X}",
+        "function": symbol["function"],
+        "offset": symbol["offset"],
+        "source": symbol["source"],
+        "line": symbol["line"],
+        "kind": kind,
+    }
+
+
+def read_stack_backtrace(config: Dict[str, Any]) -> Dict[str, Any]:
+    axf_path = str(config.get("axfPath") or "").strip()
+    if not axf_path:
+        raise RuntimeError("No AXF selected")
+    stack_words = max(16, min(512, int(config.get("stackWords") or 128)))
+    max_frames = max(4, min(64, int(config.get("maxFrames") or 32)))
+
+    session = None
+    was_running = False
+    registers: Dict[str, int] = {}
+    stack_words_data: List[int] = []
+    stack_base = 0
+    read_error: Optional[str] = None
+    try:
+        session = connect_session(config)
+        session.open()
+        target = session.target
+        try:
+            state = target.get_state()
+        except Exception:
+            state = None
+        was_running = _target_is_running_state(state)
+        target.halt()
+        pc = _read_core_register_int(target, "pc")
+        lr = _read_core_register_int(target, "lr")
+        sp = _read_core_register_int(target, "sp")
+        msp = _read_core_register_int(target, "msp")
+        psp = _read_core_register_int(target, "psp")
+        xpsr = _read_core_register_int(target, "xpsr")
+        registers = {
+            "pc": pc,
+            "lr": lr,
+            "sp": sp,
+            "msp": msp,
+            "psp": psp,
+            "xpsr": xpsr,
+        }
+        stack_base = sp & ~0x3
+        if stack_base > 0:
+            stack_words_data = list(target.read_memory_block32(stack_base, stack_words))
+    except Exception as exc:
+        read_error = str(exc)
+        raise
+    finally:
+        try:
+            if session is not None and was_running:
+                session.target.resume()
+        except Exception:
+            pass
+
+    # Symbolization is deliberately after resume so the MCU is not held halted
+    # while local AXF/DWARF parsing runs.
+    code_ranges, functions = collect_axf_symbols(axf_path)
+    frames: List[Dict[str, Any]] = []
+    seen: Set[int] = set()
+
+    def add_candidate(raw_address: int, kind: str) -> None:
+        if len(frames) >= max_frames:
+            return
+        normalized = raw_address & ~1
+        if normalized <= 0 or normalized in seen:
+            return
+        if kind == "stack" and not _is_code_address(normalized, code_ranges):
+            return
+        if normalized >= 0xFFFFFF00:
+            return
+        seen.add(normalized)
+        frames.append(
+            _make_stack_frame(
+                index=len(frames),
+                address=normalized,
+                kind=kind,
+                functions=functions,
+            )
+        )
+
+    add_candidate(registers.get("pc", 0), "pc")
+    add_candidate(registers.get("lr", 0), "lr")
+    for word in stack_words_data:
+        add_candidate(int(word), "stack")
+
+    return {
+        "type": "stack",
+        "wasRunning": was_running,
+        "registers": {
+            key: f"0x{value:08X}" for key, value in registers.items()
+        },
+        "stackBase": f"0x{stack_base:08X}",
+        "stackWords": len(stack_words_data),
+        "frames": frames,
+        "error": read_error,
+    }
+
+
 def emit(payload: Dict[str, Any]) -> None:
     print(json.dumps(payload, ensure_ascii=True), flush=True)
 
@@ -995,6 +1272,23 @@ def run_list(axf_path: str, *, output: Optional[str], only_external: bool) -> in
 
 def main(argv: Optional[List[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "stack":
+        parser = argparse.ArgumentParser(
+            prog="axf_json.py stack",
+            description="Attach with pyOCD, briefly halt, read stack, then symbolize locally.",
+        )
+        parser.add_argument("--config", required=True)
+        args = parser.parse_args(argv[1:])
+        try:
+            print(
+                json.dumps(read_stack_backtrace(read_config(args.config)), ensure_ascii=False),
+                flush=True,
+            )
+            return 0
+        except Exception as exc:
+            emit({"type": "error", "message": str(exc)})
+            return 1
+
     if argv and argv[0] == "read":
         parser = argparse.ArgumentParser(
             prog="axf_json.py read",
