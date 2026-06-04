@@ -2,7 +2,20 @@
   "appName": "uart_scope_update",
   "description": "Desktop app updates",
   "items": [
-    
+    {
+      "version": "1.13.1",
+      "shortVersion": 33,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "dll"
+        }
+      ],
+      "date": "2026-06-04",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.1+33-windows",
+      "platform": "windows"
+    },
     {
       "version": "1.11.3",
       "shortVersion": 30,
