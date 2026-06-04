@@ -9,7 +9,7 @@
       "platform": "windows",
       "arch": "x64",
       "fileName": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
-      "url": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
+      "url": "https://gitee.com/aurum999/update/releases/download/debug_plugin/uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
       "size": 40691660,
       "sha256": "d8b4c686c9fce2b0561d6e1031c9e17fcd6fc2a9776f9e4c9c0f6db5bec934bd"
     }
