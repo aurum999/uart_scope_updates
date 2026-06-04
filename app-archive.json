@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.13.0",
+      "shortVersion": 32,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "全局变量优化"
+        }
+      ],
+      "date": "2026-06-04",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.0+32-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.11.3",
       "shortVersion": 30,
       "changes": [
