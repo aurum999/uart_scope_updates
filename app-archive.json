@@ -3,17 +3,17 @@
   "description": "Desktop app updates",
   "items": [
     {
-      "version": "1.13.3",
-      "shortVersion": 35,
+      "version": "1.13.4",
+      "shortVersion": 36,
       "changes": [
         {
           "type": "feat",
-          "message": "delay"
+          "message": "log"
         }
       ],
       "date": "2026-06-05",
       "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.3+35-windows",
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.43+36-windows",
       "platform": "windows"
     },
     {
