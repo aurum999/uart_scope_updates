@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.14.0",
+      "shortVersion": 38,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "独立通道"
+        }
+      ],
+      "date": "2026-06-11",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.14.0+38-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.13.4",
       "shortVersion": 36,
       "changes": [
