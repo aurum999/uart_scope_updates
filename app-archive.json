@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.15.1",
+      "shortVersion": 40,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "变量"
+        }
+      ],
+      "date": "2026-06-12",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.15.1+40-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.14.0",
       "shortVersion": 38,
       "changes": [
@@ -14,48 +28,6 @@
       "date": "2026-06-11",
       "mandatory": false,
       "url": "https://aurum999.github.io/uart_scope_updates/archive/1.14.0+38-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.13.4",
-      "shortVersion": 36,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "log"
-        }
-      ],
-      "date": "2026-06-05",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.4+36-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.13.1",
-      "shortVersion": 33,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "dll"
-        }
-      ],
-      "date": "2026-06-04",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.13.1+33-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.11.3",
-      "shortVersion": 30,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "波形卡顿问题"
-        }
-      ],
-      "date": "2026-05-26",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.11.3+30-windows",
       "platform": "windows"
     }
   ]
