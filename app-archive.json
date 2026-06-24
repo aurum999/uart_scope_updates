@@ -3,17 +3,17 @@
   "description": "Desktop app updates",
   "items": [
     {
-      "version": "1.15.3",
-      "shortVersion": 42,
+      "version": "1.15.4",
+      "shortVersion": 43,
       "changes": [
         {
           "type": "feat",
-          "message": "无协议"
+          "message": "无协议优化"
         }
       ],
-      "date": "2026-06-18",
+      "date": "2026-06-24",
       "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.15.3+42-windows",
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.15.4+43-windows",
       "platform": "windows"
     },
     {
