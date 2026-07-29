@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.16.2",
+      "shortVersion": 47,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "数据区功能"
+        }
+      ],
+      "date": "2026-07-29",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.16.2+47-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.15.4",
       "shortVersion": 43,
       "changes": [
