@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "1.17.0",
+      "shortVersion": 48,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "智能折叠"
+        }
+      ],
+      "date": "2026-08-02",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.17.0+48-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.16.2",
       "shortVersion": 47,
       "changes": [
@@ -14,34 +28,6 @@
       "date": "2026-07-29",
       "mandatory": false,
       "url": "https://aurum999.github.io/uart_scope_updates/archive/1.16.2+47-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.15.4",
-      "shortVersion": 43,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "无协议优化"
-        }
-      ],
-      "date": "2026-06-24",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.15.4+43-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.14.0",
-      "shortVersion": 38,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "独立通道"
-        }
-      ],
-      "date": "2026-06-11",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.14.0+38-windows",
       "platform": "windows"
     }
   ]
