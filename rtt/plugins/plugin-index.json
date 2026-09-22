@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-06T08:01:39Z",
+  "generatedAt": "2026-09-22T08:01:39Z",
   "plugins": [
     {
       "id": "pyocd-rtt",
-      "version": "0.44.1",
+      "version": "0.45.1",
       "protocolVersion": 4,
       "platform": "windows",
       "arch": "x64",
-      "fileName": "uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
-      "url": "https://gitee.com/aurum999/update/releases/download/debug_plugin/uart_scope_rtt_pyocd_windows_x64_0.44.1.zip",
-      "size": 40691660,
-      "sha256": "d8b4c686c9fce2b0561d6e1031c9e17fcd6fc2a9776f9e4c9c0f6db5bec934bd"
+      "fileName": "uart_scope_rtt_pyocd_windows_x64_0.45.1.zip",
+      "url": "https://gitee.com/aurum999/update/releases/download/debug_plugin/uart_scope_rtt_pyocd_windows_x64_0.45.1.zip",
+      "size": 41244142,
+      "sha256": "131f9d82da1d656965d760de4342473b481755d53012101525dfc7830e4ac74c"
     }
   ]
 }
