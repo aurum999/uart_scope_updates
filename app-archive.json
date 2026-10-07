@@ -2,6 +2,20 @@
   "appName": "uart_scope_update",
   "description": "Desktop app updates",
   "items": [
+        {
+          "version": "2.2.1",
+          "shortVersion": 58,
+          "changes": [
+            {
+              "type": "feat",
+              "message": "图标优化"
+            }
+          ],
+          "date": "2026-10-07",
+          "mandatory": false,
+          "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.1+58-windows",
+          "platform": "windows"
+        },
     {
       "version": "2.1.0",
       "shortVersion": 54,
