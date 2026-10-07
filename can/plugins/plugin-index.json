@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "plugins": [
+    {
+      "schemaVersion": 2,
+      "id": "ballet-can",
+      "version": "1.0.0",
+      "packageFormat": "dependencies",
+      "platform": "windows",
+      "arch": "x64",
+      "sitePackages": "site-packages",
+      "python": {
+        "requires": ">=3.9,<3.15",
+        "implementation": "cpython",
+        "bits": 64,
+        "providerPluginId": "pyocd-rtt",
+        "requiresPythonEntry": true
+      },
+      "requiredPlugins": [
+        {
+          "id": "pyocd-rtt",
+          "minProtocolVersion": 4
+        }
+      ],
+      "libraries": [
+        {
+          "name": "packaging",
+          "version": "26.3"
+        },
+        {
+          "name": "pyserial",
+          "version": "3.5"
+        },
+        {
+          "name": "python-can",
+          "version": "4.6.1"
+        },
+        {
+          "name": "typing_extensions",
+          "version": "4.16.0"
+        },
+        {
+          "name": "uptime",
+          "version": "3.0.1"
+        },
+        {
+          "name": "wrapt",
+          "version": "1.17.3"
+        }
+      ],
+      "zlgcan": {
+        "dll": "sdk/zlgcan/x64/zlgcan.dll",
+        "sourceUrl": "https://www.zlg.cn/data/upload/software/Can/CAN_lib.zip",
+        "sourceSha256": "5cf5900cdb5cc0c4d304d9dcad5f593268859112f9aa77d008fc88ec093fdab6",
+        "license": "licenses/ZLGCAN-License.txt"
+      },
+      "fileName": "ballet_can_dependencies_windows_x64_1.0.0.zip",
+      "url": "https://gitee.com/aurum999/update/releases/download/debug_plugin/ballet_can_dependencies_windows_x64_1.0.0.zip",
+      "size": 10454961,
+      "sha256": "893d08313c396002b339c9e7d82c6c483fd30becae2834a4e759c3120e4dc269"
+    }
+  ]
+}
