@@ -3,6 +3,20 @@
   "description": "Desktop app updates",
   "items": [
     {
+      "version": "2.2.2",
+      "shortVersion": 59,
+      "changes": [
+        {
+          "type": "feat",
+          "message": "时间戳阈值"
+        }
+      ],
+      "date": "2026-10-13",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.2+59-windows",
+      "platform": "windows"
+    },
+    {
       "version": "1.17.0",
       "shortVersion": 48,
       "changes": [
