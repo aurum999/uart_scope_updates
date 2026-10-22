@@ -2,6 +2,20 @@
   "appName": "uart_scope_update",
   "description": "Desktop app updates",
   "items": [
+      {
+        "version": "2.2.3",
+        "shortVersion": 60,
+        "changes": [
+          {
+            "type": "feat",
+            "message": "优化"
+          }
+        ],
+        "date": "2026-10-22",
+        "mandatory": false,
+        "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.3+60-windows",
+        "platform": "windows"
+      },
         {
           "version": "2.2.1",
           "shortVersion": 58,
@@ -16,48 +30,6 @@
           "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.1+58-windows",
           "platform": "windows"
         },
-    {
-      "version": "2.1.0",
-      "shortVersion": 54,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "计算器和烧录"
-        }
-      ],
-      "date": "2026-09-29",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/2.1.0+54-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "2.2.2",
-      "shortVersion": 59,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "时间戳阈值"
-        }
-      ],
-      "date": "2026-10-13",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.2+59-windows",
-      "platform": "windows"
-    },
-    {
-      "version": "1.17.0",
-      "shortVersion": 48,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "智能折叠"
-        }
-      ],
-      "date": "2026-08-02",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/1.17.0+48-windows",
-      "platform": "windows"
-    },
     {
       "version": "1.16.2",
       "shortVersion": 47,
