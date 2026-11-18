@@ -2,7 +2,20 @@
   "appName": "uart_scope_update",
   "description": "Desktop app updates",
   "items": [
-
+    {
+      "version": "2.2.10",
+      "shortVersion": 67,
+      "changes": [
+        {
+          "type": "bug",
+          "message": "串口闪退"
+        }
+      ],
+      "date": "2026-11-18",
+      "mandatory": false,
+      "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.10+67-windows",
+      "platform": "windows"
+    },
     {
       "version": "2.2.5",
       "shortVersion": 62,
