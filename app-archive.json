@@ -2,20 +2,7 @@
   "appName": "uart_scope_update",
   "description": "Desktop app updates",
   "items": [
-    {
-      "version": "2.2.9",
-      "shortVersion": 66,
-      "changes": [
-        {
-          "type": "feat",
-          "message": "收发区优化"
-        }
-      ],
-      "date": "2026-11-13",
-      "mandatory": false,
-      "url": "https://aurum999.github.io/uart_scope_updates/archive/2.2.9+66-windows",
-      "platform": "windows"
-    },
+
     {
       "version": "2.2.5",
       "shortVersion": 62,
